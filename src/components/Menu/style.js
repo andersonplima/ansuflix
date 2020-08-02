@@ -1,9 +1,9 @@
-import styled from 'styled-components'
+import styled from 'styled-components';
 
-export const MenuWrapper = styled.nav`
+const MenuWrapper = styled.nav`
     width: 100%;
     height: 94px;
-    z-index: 1;
+    z-index: 51;
     position: fixed;
     top: 0;
     left: 0;
@@ -22,4 +22,6 @@ export const MenuWrapper = styled.nav`
         height: 40px;
         justify-content: center;
     }
-`
+`;
+
+export default MenuWrapper;

@@ -3,47 +3,68 @@ import { Link } from 'react-router-dom';
 import PageDefault from '../../../components/PageDefault';
 import FormField from '../../../components/Carousel/components/FormField';
 import Button from '../../../components/Button';
+import useForm from '../../../hooks/useForm';
+import * as categoriasRepository from '../../../repositories/categorias';
+import CategoryTable from './components/CategoryTable';
 
 function CadastroCategoria() {
-  const initialValues = { nome: '', descricao: '', cor: '#454598' };
-
+  const initialValues = {
+    titulo: '', descricao: '', cor: '#454598', url: '',
+  };
+  const { values: categoria, handleChange, clearForm } = useForm(initialValues);
   const [categorias, setCategorias] = useState([]);
-  const [categoria, setCategoria] = useState(initialValues);
+  const [refresh, setRefresh] = useState(false);
+
+  useEffect(() => {
+    (async () => {
+      const data = await categoriasRepository.getAll();
+      setCategorias(data.map(
+        ({ titulo, cor, link_extra: linkExtra }) => {
+          const categoriaResult = { titulo, cor };
+          if (linkExtra) {
+            return { ...categoriaResult, descricao: linkExtra.text, url: linkExtra.url };
+          }
+
+          return categoriaResult;
+        },
+      ));
+    })();
+  }, [refresh]);
 
   function handleSubmit(event) {
-    setCategorias([...categorias, categoria]);
-    setCategoria(initialValues);
+    (async () => {
+      const categoriaToSave = {
+        titulo: categoria.titulo,
+        cor: categoria.cor,
+        link_extra: {
+          url: categoria.url,
+          text: categoria.descricao,
+        },
+      };
+
+      await categoriasRepository.create(categoriaToSave);
+    })();
+
+    clearForm();
+    setRefresh(true);
 
     event.preventDefault();
   }
-
-  function handleChange({ target: { value, name } }) {
-    setCategoria({ ...categoria, [name]: value });
-  }
-
-  useEffect(() => {
-    const url = process.env.REACT_APP_APIURL;
-
-    fetch(url).then(async (response) => {
-      const data = await response.json();
-      setCategorias([...data]);
-    });
-  }, []);
 
   return (
     <PageDefault>
       <h1>
         Cadastro de categoria:
         {' '}
-        {categoria.nome}
+        {categoria.titulo}
       </h1>
 
       <form onSubmit={handleSubmit}>
         <FormField
           type="text"
-          value={categoria.nome}
-          caption="Nome"
-          name="nome"
+          value={categoria.titulo}
+          caption="Título"
+          name="titulo"
           onChange={handleChange}
         />
 
@@ -63,12 +84,21 @@ function CadastroCategoria() {
           onChange={handleChange}
         />
 
+        <FormField
+          type="url"
+          value={categoria.url}
+          caption="Url"
+          name="url"
+          onChange={handleChange}
+        />
+
         <Button>
           Cadastrar
         </Button>
       </form>
 
-      <table>
+      { categorias && categorias.length > 0 && (
+      <CategoryTable>
         <thead>
           <tr>
             <th>Nome</th>
@@ -78,20 +108,21 @@ function CadastroCategoria() {
         </thead>
         <tbody>
           {categorias.map((item) => (
-            <tr key={item.nome}>
+            <tr key={item.id}>
               <td>
-                {item.nome}
+                {item.titulo}
               </td>
               <td>
                 {item.descricao}
               </td>
               <td style={{ backgroundColor: item.cor }}>
-                            &nbsp;
+                &nbsp;
               </td>
             </tr>
           ))}
         </tbody>
-      </table>
+      </CategoryTable>
+      ) }
 
       <Link to="/">
         Ir para home

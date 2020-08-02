@@ -3,3 +3,11 @@
 # You can learn more about editorconfig here: https://docs.microsoft.com/en-us/visualstudio/ide/editorconfig-code-style-settings-reference
 [*]
 charset = utf-8
+
+[jsx]
+tab-size = 2
+indent-style = tab
+
+[js]
+tab-size = 2
+indent-style = tab

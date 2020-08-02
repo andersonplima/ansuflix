@@ -1,10 +1,10 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
-import dadosIniciais from '../../data/dados_iniciais.json';
 import Menu from '../../components/Menu';
 import BannerMain from '../../components/BannerMain';
 import Carousel from '../../components/Carousel';
 import Footer from '../../components/Footer';
+import * as categoriasRepository from '../../repositories/categorias';
 
 const AppWrapper = styled.div`
   background: var(--grayDark);
@@ -16,18 +16,31 @@ const AppWrapper = styled.div`
 `;
 
 function Home() {
+  const [dadosIniciais, setDadosIniciais] = useState([]);
+
+  useEffect(() => {
+    (async () => {
+      const data = await categoriasRepository.getAllWithVideos();
+      setDadosIniciais([...data]);
+    })();
+  }, []);
+
   return (
     <AppWrapper>
       <Menu />
 
-      <BannerMain
-        videoTitle={dadosIniciais.categorias[0].videos[0].titulo}
-        url={dadosIniciais.categorias[0].videos[0].url}
-        videoDescription="O que é ..."
-      />
+      {dadosIniciais.length > 0 && (
+        <BannerMain
+          videoTitle={dadosIniciais[0].videos[0].titulo}
+          url={dadosIniciais[0].videos[0].url}
+          videoDescription="O que é ..."
+        />
+      )}
 
-      {dadosIniciais.categorias.map(
-        (category) => (<Carousel key={category.titulo} ignoreFirstVideo category={category} />),
+      {dadosIniciais.map(
+        (category, i) => (
+          <Carousel key={category.id} ignoreFirstVideo={i === 0} category={category} />
+        ),
       )}
 
       <Footer />

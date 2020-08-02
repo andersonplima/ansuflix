@@ -35,6 +35,7 @@ FormFieldContainer.Label = styled.label`
     }
 
     textarea, input {
+        background-color: var(--white);
         border: 0;
         outline: 0;
         margin-left: 5px;
